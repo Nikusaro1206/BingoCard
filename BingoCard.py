@@ -24,15 +24,15 @@ class Aplication(tk.Frame):
         self.window2.geometry("200x200")
         self.create_widgets2()
 
-
     def create_widgets2(self):
         title_label = tk.Label(self.window2,text="ビンゴカード")
         title_label.pack()
-        
+#todo:btnの配置
+#         
     def card_number_lottery (self):
         for j in range (1,26):
             self.card.append (self.card_drawing (j))
-            
+
     def card_drawing (self,i):
         if not i == 13:#真ん中の数字用の分岐
             if i >=1 and i <=5:
@@ -67,6 +67,7 @@ class Aplication(tk.Frame):
 
     def hushing (self):
         return hashlib.sha256(self.conbo_number()).hexdigest()
+#todo:リーチのプログラム
 
 root = tk.Tk()
 root.title("Bingo Card")#title
