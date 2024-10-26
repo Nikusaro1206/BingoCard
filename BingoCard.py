@@ -2,6 +2,7 @@ import tkinter as tk
 import hashlib
 import random
 import tkinter.messagebox as tkmg
+from functools import partial
 
 class Aplication(tk.Frame):
     def __init__(self,root=None):
@@ -11,27 +12,56 @@ class Aplication(tk.Frame):
         self.pack()
         self.card = []
         self.pack_propagate(0)
+        self.card_number_lottery(0)
         self.create_widgets()
+        
 
     def create_widgets(self):#GUI部分
-        generation_btn = tk.Button(self, text="ビンゴカードの生成",command = self.create_window)
-        generation_btn.pack()
 
-    def create_window(self):
-        self.card_number_lottery()
-        self.window2 = tk.Toplevel(self)
-        self.window2.focus_set()
-        self.window2.geometry("200x200")
-        self.create_widgets2()
+        generation_btn = tk.Button(self, text="ビンゴカードの生成",command = lambda:self.card_number_lottery(1))
+        generation_btn.place(relx=0.1,y=300)
 
-    def create_widgets2(self):
-        title_label = tk.Label(self.window2,text="ビンゴカード")
-        title_label.pack()
+    #def create_window(self):
+        #self.card_number_lottery()
+        #self.window2 = tk.Toplevel(self)
+        #self.window2.focus_set()
+        #self.window2.geometry("200x200")
+        #self.create_widgets2()
+
+    #def create_widgets2(self):
+        title_label = tk.Label(self,text="ビンゴカード")
+        title_label.place(relx=0.5,y=20,anchor=tk.CENTER)
 #todo:btnの配置
+        btn_block = tk.LabelFrame(self,padx=10,pady=10)
+        btn_block.place(relx=0.5,y=150,anchor=tk.CENTER)
+        for i in range (0,5):
+            for j in range (0,5):
+                list_element = 5*(i)+(j)
+                number = self.card[list_element]
+                self.button_text = tk.StringVar()
+                self.button_text.set(number)
+                button = tk.Button(self,textvariable=self.button_text,
+                                   command = partial(self.button_click_1,list_element),width=2)
+                button.grid(in_ =btn_block,row = j,column=i)
+
+    def button_text_set(self):
+        for i in range (0,5):
+            for j in range (0,5):
+                list_element = 5*(i)+(j)
+                self.button_text.set(self.card[list_element])
+
+    def button_click_1(self,i):
+        print(f"{i}番目のボタンが押されました")
 #         
-    def card_number_lottery (self):
+    def card_number_lottery (self,repeat):
+        self.card.clear()
         for j in range (1,26):
             self.card.append (self.card_drawing (j))
+        print(self.card)
+        if not repeat == 0:
+            self.button_text_set()
+        else:
+            pass
 
     def card_drawing (self,i):
         if not i == 13:#真ん中の数字用の分岐
