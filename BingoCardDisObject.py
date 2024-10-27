@@ -30,10 +30,11 @@ def card_window():
             button_text = tk.StringVar()
             button_text.set(number)
             button = tk.Button(card_win,textvariable=button_text,
-                               #command = partial(button_click_1,list_element),
+                               command = partial(button_click_1,list_element),
                                width=2)
-            button.bind("<1>",callback)
+            button.bind("<1>",callback,"+")
             button.grid(in_ =btn_block,row = j,column=i)
+#            button.config(command = callback(btn=button,i=list_element))
 
 #def button_text_set():
 #    for i in range (0,5):
@@ -41,7 +42,14 @@ def card_window():
 #            list_element = 5*(i)+(j)
 #            button_text.set(card[list_element])
 def callback(event):
-    print(event)
+#    def nothing():
+#        btn.config(bg="#008000")
+#    print(f"{i}番目のボタンが押されました")
+#    block_element[i] = 1
+#    print(block_element)
+#    return nothing
+#    print(event)
+#    print(i)
     # ボタンの背景色がデフォルト値だったら赤に変更し、
     if event.widget["bg"] == "SystemButtonFace":
         event.widget["bg"] = "red"
@@ -50,8 +58,6 @@ def callback(event):
 #        block_element[i] = 1
 #        print(block_element)
     # 赤色になっていたら、元に戻す。
-    else:
-        pass
 #        event.widget["bg"] = "SystemButtonFace"
 #    reach_judgment(event)
 
