@@ -77,7 +77,7 @@ class Main_aplication(tk.Frame):
 
 class Card_window(tk.Frame):
     def __init__(self,root=None,card=None):
-        super().__init__(root,width=400,height=500,
+        super().__init__(root,width=400,height=600,
                         borderwidth=4,relief='groove')
         self.root = root
         self.card_number = card
@@ -92,6 +92,24 @@ class Card_window(tk.Frame):
         btn_block = tk.LabelFrame(self,padx=10,pady=10)
         btn_block.place(relx=0.5,y=300,anchor=tk.CENTER)
 
+        jedgement_sp = tk.LabelFrame(self,text="判定",padx=10,pady=10)
+        reach_sp = tk.Label(self,text="REACH:",width=7)
+        self.reach_text = tk.StringVar()
+        self.reach_text.set("0")
+        reach_label = tk.Label(self,textvariable=self.reach_text,width=2)
+        bingo_sp = tk.Label(self,text="BINGO:",width=7)
+        self.bingo_text = tk.StringVar()
+        self.bingo_text.set("0")
+        bingo_label = tk.Label(self,textvariable=self.bingo_text,width=2)
+
+        jedgement_sp.place(relx=0.5,y=520,anchor=tk.CENTER)
+        reach_sp.grid(in_=jedgement_sp,row=0,column=0)
+        reach_label.grid(in_=jedgement_sp,row=0,column=1)
+#        reach_label.pack()
+        bingo_sp.grid(in_=jedgement_sp,row=1,column=0)
+        bingo_label.grid(in_=jedgement_sp,row=1,column=1)
+#        bingo_label.pack()
+
 #for文でbuttonウィジェット配置
         for i in range (0,5):
             for j in range (0,5):
@@ -100,11 +118,13 @@ class Card_window(tk.Frame):
                 self.button = tk.Button(self,text=self.number,font=("Times",25,"bold"),width=3)
                 self.button.grid(in_ =btn_block,row = j,column=i)
                 self.button.bind("<1>",partial(self.callback,element=list_element,beside=j,vertical=i))
+
+
         
 #選択されたボタンの色替え    
     def callback(self,event,element,beside,vertical):
         
-        if event.widget["bg"] == "SystemButtonFace":
+        if event.widget["bg"] == "SystemButtonFace":#check:分岐なくてもいいかも
             event.widget["bg"] = "red"
             event.widget["state"] = "disable"
             self.block_element[beside,vertical] = 1
@@ -120,6 +140,7 @@ class Card_window(tk.Frame):
         list_sum_beside = np.sum(self.block_element,axis=1)
         list_sum_beside_all = np.append(list_sum_beside
                                         ,self.cros_sum(1))#あとで繰り返し処理しやすいように左斜を横判定に
+        #0-4で各方向の開いたマスのリーチ判定,5で斜めの判定
         for i in range (0,6):
             if list_sum_vartical_all[i] == 5:
                 bingo_count += 1
@@ -131,6 +152,8 @@ class Card_window(tk.Frame):
                 reach_count += 1
         print(f"raach:{reach_count}")
         print(f"bingo:{bingo_count}")
+        self.reach_text.set(reach_count)
+        self.bingo_text.set(bingo_count)
 
     def cros_sum(self,sum_type):
         a = 0
