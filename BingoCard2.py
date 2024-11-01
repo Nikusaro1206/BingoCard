@@ -16,12 +16,13 @@ class Main_aplication(tk.Frame):
         self.pack_propagate(0)
         self.create_widgets()
 
+    #ボタンを配置
     def create_widgets(self):
         btn=tk.Button(self,text="カードを生成",command = self.create_window)
         btn.pack()
-
+    #カード用ボタンの生成
     def create_window(self):
-        new_hush = self.hush_jedgment()
+        new_hush = self.hush_jedgment()#カード番号の抽選とハッシュ値の取得
         self.hush_number.append(new_hush)
         #print(self.hush_number)
         current=tk.Tk()
@@ -29,12 +30,26 @@ class Main_aplication(tk.Frame):
         card_window=Card_window(root=current,card=self.card)
         card_window.mainloop()
 
+    #カード番号の抽選とハッシュ値の取得
+    def hush_jedgment(self):
+        self.card = self.card_number_lottery()#カード番号の抽選
+        #print(self.card)
+        while True:#重複回避
+            new_hush_number = self.hushing()
+            if new_hush_number in  self.hush_number:
+                self.card = self.card_number_lottery()#カード番号の再抽選
+            else:
+                break
+        return new_hush_number
+    
+    #カード番号の抽選
     def card_number_lottery (self):
         card = []
         for column in range (1,26):
-            card.append(self.card_drawing (column))
+            card.append(self.card_drawing (column))#カード番号の抽選２
         return card
-
+    
+    #カード番号の抽選２
     def card_drawing (self,i):
         if not i == 13:#真ん中の数字用の分岐
             if i >=1 and i <=5:
@@ -57,23 +72,10 @@ class Main_aplication(tk.Frame):
         else:
             return 0#0は抽選外
         
-    def conbo_number (self):
-        str_card = str(self.card)
-        return str_card.encode('utf-8')
-
+    #ハッシュ値の取得
     def hushing (self):
-        return hashlib.sha256(self.conbo_number()).hexdigest()
-    
-    def hush_jedgment(self):
-        self.card = self.card_number_lottery()
-        #print(self.card)
-        while True:
-            new_hush_number = self.hushing()
-            if new_hush_number in  self.hush_number:
-                self.card = self.card_number_lottery()
-            else:
-                break
-        return new_hush_number
+        str_card = str(self.card)
+        return hashlib.sha256(str_card.encode('utf-8')).hexdigest()
 
 class Card_window(tk.Frame):
     def __init__(self,root=None,card=None):
@@ -82,7 +84,7 @@ class Card_window(tk.Frame):
         self.root = root
         self.card_number = card
         self.pack()
-        self.block_element = np.zeros((5,5))
+        self.block_element = np.zeros((5,5))#5x5の配列0詰め
         self.pack_propagate(0)
         self.create_number()
 
@@ -96,10 +98,10 @@ class Card_window(tk.Frame):
         for i in range (0,5):
             for j in range (0,5):
                 list_element = 5*(i)+(j)
-                self.number = self.card_number[list_element]
-                self.button = tk.Button(self,text=self.number,font=("Times",25,"bold"),width=3)
-                self.button.grid(in_ =btn_block,row = j,column=i)
-                self.button.bind("<1>",partial(self.callback,beside=j,vertical=i))
+                number = self.card_number[list_element]
+                button = tk.Button(self,text=number,font=("Times",25,"bold"),width=3)
+                button.grid(in_ =btn_block,row = j,column=i)
+                button.bind("<1>",partial(self.callback,beside=j,vertical=i))
 
         jedgement_sp = tk.LabelFrame(self,text="判定",padx=10,pady=10)
         reach_sp = tk.Label(self,text="REACH:",width=7)
@@ -134,28 +136,31 @@ class Card_window(tk.Frame):
                                         ,self.cros_sum(1))#あとで繰り返し処理しやすいように左斜を横判定に
         
         #0-4で各方向の開いたマスのリーチ判定,5番目で斜めの判定
-        for i in range (0,6):
+        for i in range (0,6):#check:配列結合して分岐を1セットにするのもありかも
             if list_sum_vartical_all[i] == 5:
                 bingo_count += 1
+            elif list_sum_vartical_all[i] == 4:
+                reach_count += 1
+            else:
+                pass
             if list_sum_beside_all[i] == 5:
                 bingo_count += 1
-            if list_sum_vartical_all[i] == 4:
+            elif list_sum_beside_all[i] == 4:
                 reach_count += 1
-            if list_sum_beside_all[i] == 4:
-                reach_count += 1
+            else:
+                pass
         #print(f"raach:{reach_count}")
         #print(f"bingo:{bingo_count}")
         self.reach_label.config(text=reach_count)#2つ目のクラスだと.setは使えない
         self.bingo_label.config(text=bingo_count)
 
+    #斜め用判定
     def cros_sum(self,sum_type):
         a = 0
-        #右ななめsum_type=0
-        if sum_type == 0:
+        if sum_type == 0:#右ななめsum_type=0
             for i in range (0,5):
                 a += self.block_element[i,i]
-        #左ななめsum_type=1
-        if sum_type == 1:
+        if sum_type == 1:#左ななめsum_type=1
             for i in range (0,5):
                 a += self.block_element[i,4-i]
         return a
