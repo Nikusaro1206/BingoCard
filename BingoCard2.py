@@ -7,7 +7,7 @@ from functools import partial
 
 class Main_aplication(tk.Frame):
     def __init__(self,root=None):
-        super().__init__(root,width=300,height=400,
+        super().__init__(root,width=100,height=70,
                          borderwidth=4,relief='groove')
         self.root = root
         self.pack()
@@ -17,13 +17,13 @@ class Main_aplication(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
-        btn=tk.Button(self,text="ウィンドウを生成",command = self.create_window)
+        btn=tk.Button(self,text="カードを生成",command = self.create_window)
         btn.pack()
 
     def create_window(self):
         new_hush = self.hush_jedgment()
         self.hush_number.append(new_hush)
-        print(self.hush_number)
+        #print(self.hush_number)
         current=tk.Tk()
         current.title(f"{new_hush}")
         card_window=Card_window(root=current,card=self.card)
@@ -31,8 +31,8 @@ class Main_aplication(tk.Frame):
 
     def card_number_lottery (self):
         card = []
-        for j in range (1,26):
-            card.append(self.card_drawing (j))
+        for column in range (1,26):
+            card.append(self.card_drawing (column))
         return card
 
     def card_drawing (self,i):
@@ -66,7 +66,7 @@ class Main_aplication(tk.Frame):
     
     def hush_jedgment(self):
         self.card = self.card_number_lottery()
-        print(self.card)
+        #print(self.card)
         while True:
             new_hush_number = self.hushing()
             if new_hush_number in  self.hush_number:
@@ -92,37 +92,29 @@ class Card_window(tk.Frame):
         btn_block = tk.LabelFrame(self,padx=10,pady=10)
         btn_block.place(relx=0.5,y=300,anchor=tk.CENTER)
 
-        jedgement_sp = tk.LabelFrame(self,text="判定",padx=10,pady=10)
-        reach_sp = tk.Label(self,text="REACH:",width=7)
-        self.reach_text = tk.StringVar()
-        self.reach_text.set("0")
-        reach_label = tk.Label(self,textvariable=self.reach_text,width=2)
-        bingo_sp = tk.Label(self,text="BINGO:",width=7)
-        self.bingo_text = tk.StringVar()
-        self.bingo_text.set("0")
-        bingo_label = tk.Label(self,textvariable=self.bingo_text,width=2)
-
-        jedgement_sp.place(relx=0.5,y=520,anchor=tk.CENTER)
-        reach_sp.grid(in_=jedgement_sp,row=0,column=0)
-        reach_label.grid(in_=jedgement_sp,row=0,column=1)
-#        reach_label.pack()
-        bingo_sp.grid(in_=jedgement_sp,row=1,column=0)
-        bingo_label.grid(in_=jedgement_sp,row=1,column=1)
-#        bingo_label.pack()
-
-#for文でbuttonウィジェット配置
+        #for文でbuttonウィジェット配置
         for i in range (0,5):
             for j in range (0,5):
                 list_element = 5*(i)+(j)
                 self.number = self.card_number[list_element]
                 self.button = tk.Button(self,text=self.number,font=("Times",25,"bold"),width=3)
                 self.button.grid(in_ =btn_block,row = j,column=i)
-                self.button.bind("<1>",partial(self.callback,element=list_element,beside=j,vertical=i))
+                self.button.bind("<1>",partial(self.callback,beside=j,vertical=i))
 
+        jedgement_sp = tk.LabelFrame(self,text="判定",padx=10,pady=10)
+        reach_sp = tk.Label(self,text="REACH:",width=7)
+        self.reach_label = tk.Label(self,text=0,width=2)
+        bingo_sp = tk.Label(self,text="BINGO:",width=7)
+        self.bingo_label = tk.Label(self,text=0,width=2)
 
-        
-#選択されたボタンの色替え    
-    def callback(self,event,element,beside,vertical):
+        jedgement_sp.place(relx=0.5,y=520,anchor=tk.CENTER)
+        reach_sp.grid(in_=jedgement_sp,row=0,column=0)
+        self.reach_label.grid(in_=jedgement_sp,row=0,column=1)
+        bingo_sp.grid(in_=jedgement_sp,row=1,column=0)
+        self.bingo_label.grid(in_=jedgement_sp,row=1,column=1)
+
+    #選択されたボタンの色替え    
+    def callback(self,event,beside,vertical):
         
         if event.widget["bg"] == "SystemButtonFace":#check:分岐なくてもいいかも
             event.widget["bg"] = "red"
@@ -130,7 +122,7 @@ class Card_window(tk.Frame):
             self.block_element[beside,vertical] = 1
             self.reach_judgment()
 
-#リーチとビンゴの判定
+    #リーチとビンゴの判定
     def reach_judgment(self):
         bingo_count=0
         reach_count=0
@@ -140,7 +132,8 @@ class Card_window(tk.Frame):
         list_sum_beside = np.sum(self.block_element,axis=1)
         list_sum_beside_all = np.append(list_sum_beside
                                         ,self.cros_sum(1))#あとで繰り返し処理しやすいように左斜を横判定に
-        #0-4で各方向の開いたマスのリーチ判定,5で斜めの判定
+        
+        #0-4で各方向の開いたマスのリーチ判定,5番目で斜めの判定
         for i in range (0,6):
             if list_sum_vartical_all[i] == 5:
                 bingo_count += 1
@@ -150,10 +143,10 @@ class Card_window(tk.Frame):
                 reach_count += 1
             if list_sum_beside_all[i] == 4:
                 reach_count += 1
-        print(f"raach:{reach_count}")
-        print(f"bingo:{bingo_count}")
-        self.reach_text.set(reach_count)
-        self.bingo_text.set(bingo_count)
+        #print(f"raach:{reach_count}")
+        #print(f"bingo:{bingo_count}")
+        self.reach_label.config(text=reach_count)#2つ目のクラスだと.setは使えない
+        self.bingo_label.config(text=bingo_count)
 
     def cros_sum(self,sum_type):
         a = 0
