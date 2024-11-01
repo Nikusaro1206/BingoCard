@@ -25,6 +25,7 @@ class Main_aplication(tk.Frame):
         check_label=tk.Label(self,textvariable=self.check_text)
         check_label.pack()
 
+
     def create_window(self):
         new_hush = self.hush_jedgment()
         self.hush_number.append(new_hush)
