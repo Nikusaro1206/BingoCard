@@ -81,15 +81,13 @@ class Card_window(tk.Frame):
         super().__init__(root,width=400,height=600,
                         borderwidth=4,relief='groove')
         self.root = root
-        self.card_number = card
-        self.hush = hush
         self.pack()
         self.block_element = np.zeros((5,5))#5x5の配列0詰め
         self.pack_propagate(0)
-        self.create_number()
+        self.create_number(card,hush)
 
-    def create_number(self):
-        text=tk.Label(self,text=f"ハッシュ値:{self.hush}")
+    def create_number(self,card_number,hush):
+        text=tk.Label(self,text=f"ハッシュ値:{hush}")
         text.place(relx=0.5,y=580,anchor=tk.CENTER)
         decorasion_sp = tk.LabelFrame(self,padx=10,pady=10,relief="flat")
         decorasion_sp.place(relx=0.5,y=80,anchor=tk.CENTER)
@@ -105,7 +103,7 @@ class Card_window(tk.Frame):
         for i in range (0,5):
             for j in range (0,5):
                 list_element = 5*(i)+(j)
-                number = self.card_number[list_element]
+                number = card_number[list_element]
                 button = tk.Button(self,text=number,font=("Times",25,"bold"),width=3)
                 button.grid(in_ =btn_block,row = j,column=i)
                 button.bind("<1>",partial(self.callback,beside=j,vertical=i))
