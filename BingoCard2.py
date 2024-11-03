@@ -2,7 +2,6 @@ import tkinter as tk
 import hashlib
 import numpy as np
 import random
-import tkinter.messagebox as tkmg
 from functools import partial
 
 class Main_aplication(tk.Frame):
@@ -20,20 +19,20 @@ class Main_aplication(tk.Frame):
     def create_widgets(self):
         btn=tk.Button(self,text="カードを生成",command = self.create_window)
         btn.pack()
-    #カード用ボタンの生成
+
+    #カード用クラスの実行
     def create_window(self):
         new_hush = self.hush_jedgment()#カード番号の抽選とハッシュ値の取得
+        #check:抽選とハッシュ値は別にしたほうがいいかも追いかけづらい
         self.hush_number.append(new_hush)
-        #print(self.hush_number)
         current=tk.Tk()
-        current.title(f"{new_hush}")
-        card_window=Card_window(root=current,card=self.card)
+        current.title(f"BINGO CARD")
+        card_window=Card_window(root=current,card=self.card,hush = new_hush)
         card_window.mainloop()
 
     #カード番号の抽選とハッシュ値の取得
     def hush_jedgment(self):
         self.card = self.card_number_lottery()#カード番号の抽選
-        #print(self.card)
         while True:#重複回避
             new_hush_number = self.hushing()
             if new_hush_number in  self.hush_number:
@@ -46,11 +45,11 @@ class Main_aplication(tk.Frame):
     def card_number_lottery (self):
         card = []
         for column in range (1,26):
-            card.append(self.card_drawing (column))#カード番号の抽選２
+            card.append(self.card_drawing (column,card))#カード番号の抽選２
         return card
     
     #カード番号の抽選２
-    def card_drawing (self,i):
+    def card_drawing (self,i,card):
         if not i == 13:#真ん中の数字用の分岐
             if i >=1 and i <=5:
                 a,b=1,15
@@ -64,7 +63,7 @@ class Main_aplication(tk.Frame):
                 a , b= 61 ,75
             kari = random.randint(a,b)
             while True:
-                if not kari in self.card:
+                if not kari in card:
                     break
                 else:
                     kari = random.randint(a,b)
@@ -75,25 +74,33 @@ class Main_aplication(tk.Frame):
     #ハッシュ値の取得
     def hushing (self):
         str_card = str(self.card)
-        return hashlib.sha256(str_card.encode('utf-8')).hexdigest()
+        return hashlib.md5(str_card.encode('utf-8')).hexdigest()
 
 class Card_window(tk.Frame):
-    def __init__(self,root=None,card=None):
+    def __init__(self,root=None,card=None,hush=None):
         super().__init__(root,width=400,height=600,
                         borderwidth=4,relief='groove')
         self.root = root
         self.card_number = card
+        self.hush = hush
         self.pack()
         self.block_element = np.zeros((5,5))#5x5の配列0詰め
         self.pack_propagate(0)
         self.create_number()
 
     def create_number(self):
-        text=tk.Label(self,text="Bingo Card")
-        text.place(relx=0.5,y=20,anchor=tk.CENTER)
+        text=tk.Label(self,text=f"ハッシュ値:{self.hush}")
+        text.place(relx=0.5,y=580,anchor=tk.CENTER)
+        decorasion_sp = tk.LabelFrame(self,padx=10,pady=10,relief="flat")
+        decorasion_sp.place(relx=0.5,y=80,anchor=tk.CENTER)
+        BINGO = ["B","I","N","G","O"]
+        for i in range (0,5):
+            decorasion = BINGO[i]
+            decorasion_label = tk.Label(self,text = decorasion,font=("Times",27,"bold"),width=3)
+            decorasion_label.grid(in_ = decorasion_sp,row=0,column=i)
+
         btn_block = tk.LabelFrame(self,padx=10,pady=10)
         btn_block.place(relx=0.5,y=300,anchor=tk.CENTER)
-
         #for文でbuttonウィジェット配置
         for i in range (0,5):
             for j in range (0,5):
@@ -149,8 +156,6 @@ class Card_window(tk.Frame):
                 reach_count += 1
             else:
                 pass
-        #print(f"raach:{reach_count}")
-        #print(f"bingo:{bingo_count}")
         self.reach_label.config(text=reach_count)#2つ目のクラスだと.setは使えない
         self.bingo_label.config(text=bingo_count)
 
